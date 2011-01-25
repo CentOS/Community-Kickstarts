@@ -1,4 +1,4 @@
-Bluecain is a collecton of Kickstart files that are used to test the
+Bluecain is a collection of Kickstart files that are used to test the
 CentOS deployment process.
 
 The aim is to not only test the installer, but also typical roles
