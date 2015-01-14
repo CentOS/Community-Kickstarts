@@ -38,7 +38,7 @@ These steps are run for every kickstart file included in this git repo
 
 --------------------------------------------------------------------
 
-Feel free to contribute against centos4 or 5 or 6 (or common ones ) for 
+Feel free to contribute against centos 5,6 or 7 (or common ones ) for 
 bare metal installs, Xen installs and KVM installs.
 
 Xen and KVM installs are run via python-virtinstall. 
