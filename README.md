@@ -3,7 +3,7 @@
 The aim for this repository is to provide functional sample kickstarts and
 snippets for the various types of deployments used in the community. 
 
-Feel free to contribute against centos 5,6 or 7 (or common ones ) for 
+Feel free to contribute against CentOS 5,6 or 7 (or common ones ) for 
 bare metal installs, Xen installs and KVM installs.
 
 
