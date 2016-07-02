@@ -1,0 +1,3 @@
+[submodule "jaks"]
+	path = jaks
+	url = https://github.com/jas-/jaks.git
