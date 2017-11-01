@@ -1,0 +1,71 @@
+#
+# centos6-autoraid1.snip
+#
+# David "xdroop" Mackintosh
+#
+# Original credit belongs to someone else, probably back in the ancient days
+# of the cobbler mail list.
+#
+# This Kickstart snippet checks the first two hard drives in the system.
+# If they are the same size, then it tries to build a RAID-1 mirror on
+# them. If it can't, then it creates a /boot and a LVM arrangement.
+#
+# By default I create a 1G swap and throw the rest in /. Because I've been
+# carting this around since RHEL4 days, it refers to ext3. Of course all
+# of this is changable.
+#
+# For some reason it doesn't work on C7.
+#
+
+
+# Partitioning information provided from the PRE script, below
+clearpart --all --initlabel
+%include /tmp/partinfo
+bootloader --location=mbr
+
+
+%pre
+# PRE script to do partitioning.
+# because reasons, this has to be the last % section of the ks.cfg
+
+# find hard drives
+# if you are using cobbler, remember to escape the $ in the next line
+set \$(list-harddrives)
+# this is the number of hard drives found
+let numd=$#/2
+# these are the device names of the first two drives
+d1=$1
+d2=$3
+# these are the sizes of the first two drives
+s1=$2
+s2=$4
+# if we have two or more drives, try to raid-1 the first two
+if [ $numd -ge 2 ] ; then
+        # paper-bag check -- only if the sizes are the same
+        if [ "$s1" = "$s2" ] ; then
+                # Naturally you can create more partitions than this, and/or
+                # change the sizes. This creates a 1G swap and the rest as
+                # the / filesystem.
+                cat << EOF >> /tmp/partinfo
+part raid.11 --size 1024 --asprimary --ondrive $d1
+part raid.12 --size 1 --grow --ondrive $d1
+part raid.21 --size 1024 --asprimary --ondrive $d2
+part raid.22 --size 1 --grow --ondrive $d2
+raid swap --fstype swap --device md1 --level RAID1 raid.11 raid.21
+raid /    --fstype ext3 --device md2 --level RAID1 raid.12 raid.22
+EOF
+        fi
+fi
+if [ ! -f /tmp/partinfo ] ; then
+        # if we get here, then we either have only one disk
+        # or the first two disks do not match in size.
+        # I am using lvm to make filesystem growth easier.
+        cat << EOF >> /tmp/partinfo
+part /boot --fstype ext3 --ondisk=$d1 --size=1024 --fsoptions="defaults,relatime" --asprimary
+part pv.6 --grow --size=1 --ondisk=$d1
+volgroup Volume00 --pesize=65536 pv.6
+logvol / --fstype=ext3 --fsoptions="defaults,relatime" --name=lvroot --vgname=Volume00 --size=1 --grow
+logvol swap --name=lvswap --vgname=Volume00 --size=1024
+EOF
+fi
+
